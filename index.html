@@ -601,6 +601,12 @@
       <li>Haz clic en un bloque para abrir o ejecutar ese archivo.</li>
       <li>La altura de cada bloque es el tamaño del archivo.</li>
     </ul>
+    <label for="dificultad">Dificultad</label>
+    <select id="dificultad">
+      <option value="300" data-metros="100">Fácil (5 min)</option>
+      <option value="180" data-metros="60" selected>Normal (3 min)</option>
+      <option value="90" data-metros="30" >Difícil (1.5 min)</option>
+    </select>
     <button id="btn-iniciar" class="principal">Iniciar sistema</button>
   </div>
 </div>
@@ -645,8 +651,8 @@ const rig = document.getElementById('rig');
 // 💡 $ es solo un nombre corto: $('reloj') hace lo mismo que document.getElementById('reloj')
 const $ = id => document.getElementById(id);
 
-const DURACION = 180;           // ✏️ segundos para ganar
-const METROS_INICIALES = 60;    // a qué distancia empiezan los raptores
+let DURACION = 180;           // ✏️ segundos para ganar
+let METROS_INICIALES = 60;    // a qué distancia empiezan los raptores
 
 /* ---------- Estado del juego ----------
    💡 Todo lo que "recuerda" el juego vive en este objeto J. Si algo se rompe,
@@ -906,9 +912,9 @@ function restaurarEnergia() {
   const emerg = $('luz-emerg');
   emerg.removeAttribute('animation');
   emerg.setAttribute('light', 'intensity', 0);
-  $('luz-amb').setAttribute('light', { color: '#c9d8ff', intensity: 0.9 });
+  $('luz-amb').setAttribute('light', { color: '#b07c02', intensity: 0.9 });
   $('luz-dir').setAttribute('light', 'intensity', 0.9);
-  $('suelo').components['suelo-reticula'].setColor('#3f86d6');
+  $('suelo').components['suelo-reticula'].setColor('#014b4d');
   pintarPlataformas();
   escribir('ENERGÍA RESTAURADA. Cerraduras magnéticas en línea.', 'aviso');
   sonido.exito();
@@ -969,6 +975,8 @@ function cadaCuadro() {
       (aquí, tu mejor tiempo). Va dentro de try/catch porque algunos
       navegadores lo bloquean; si falla, el juego sigue sin récord. */
 function iniciar() {
+  DURACION = Number($('dificultad').value); //se sgrega la variable de dificultad
+  J.restante = DURACION;
   ctxAudio();
   $('portada').hidden = true;
   $('portada').style.display = 'none';
@@ -1054,7 +1062,14 @@ escena.addEventListener('elegir-archivo', e => {
   entrarCarpeta(n, true);
   abrirArchivo(a);
 });
+$('dificultad').addEventListener('change', () => {
+  METROS_INICIALES = Number($('dificultad').selectedOptions[0].dataset.metros);
+  DURACION = Number($('dificultad').value);
+  J.restante = DURACION;
 
+  $('reloj').textContent = Math.floor(DURACION / 60) + ':' + String(DURACION % 60).padStart(2, '0');
+  $('metros').textContent = METROS_INICIALES + ' m';
+});
 $('btn-iniciar').addEventListener('click', iniciar);
 $('btn-subir').addEventListener('click', () => { if (J.activo) { sonido.clic(); subir(); } });
 $('btn-general').addEventListener('click', () => { if (J.activo) { sonido.clic(); vistaGeneral(); escribir('$ cd /isla-ambar', 'cmd'); listar(RAIZ); } });
