@@ -147,6 +147,10 @@
     #relleno.critico { background: var(--rojo); }
     #metros, #reloj { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     #reloj { font-size: 18px; font-weight: 500; min-width: 3.2em; text-align: right; }
+    /* ---- Coleccionables para mejor puntuacion ---- */
+    #coleccionables{ display: flex; gap: 12px; align-items: center; font-family: var(--mono); font-size: 14px; }
+    .coleccionable-hud.activo{opacity:1; transform: scale(1.15);}
+    #puntos{color: var(--ambar); font-weight: 600;}
 
     /* ---- Cartelito que aparece al pasar el mouse sobre algo ----
        pointer-events: none  hace que el mouse lo "atraviese" y no estorbe los clics */
@@ -565,6 +569,22 @@
   <div id="ruta"><span class="usuario">ruiz@control</span>:/isla-ambar $</div>
   <div id="estado">
     <span>Energía: <span id="energia" class="emergencia">emergencia</span></span>
+  </div>
+  <div id="coleccionables">
+    <span id="hud-notas" class="coleccionable-hud">
+    📄 </span id="contador notas">0</span>/3
+  </span>
+  <span id="hud-tarjetas" class="coleccionable-hud">
+    🪪 <span id="contador-tarjetas">0</span>/2
+  </span>
+
+  <span id="hud-adn" class="coleccionable-hud">
+    🧬 <span id="contador-adn">0</span>/3
+  </span>
+
+  <span id="puntos">
+    Puntos: <span id="contador-puntos">0</span>
+  </span>
     <span class="medidor">
       <span>Pasillo</span>
       <span class="medidor-barra" aria-hidden="true"><span id="relleno"></span></span>
@@ -664,6 +684,8 @@ const J = {
   dirActual: null,
   avisosDados: new Set(),
   pendiente: null               // lo que se hará al escribir bien la clave
+  // coleccionables
+  puntos:0, encontrados:new Set(), coleccionables:{notas:0, tarjetas:0, adn:0}
 };
 // RAIZ = la carpeta principal; NODOS = lista de TODAS las carpetas (llegan en "sistema-listo")
 let RAIZ = null, NODOS = [];
@@ -836,13 +858,42 @@ function revisarClave() {
   sonido.exito();
   p.despues();
 }
-
+//funcion para registrar los coleccionables encontrados
+function registrarColeccionable(a) {
+   // Si el archivo no es coleccionable, termina
+  if (!a.coleccionable) return;
+  // ID único = carpeta + nombre del archivo
+  const id = (a.dir ? a.dir.ruta : '') + '/' + a.nombre;
+  // Si ya fue encontrado, no vuelve a contar
+  if (J.encontrados.has(id)) return;
+  // Lo guardamos
+  J.encontrados.add(id);
+  // Tipo de coleccionable: notas, tarjetas o adn
+  const tipo = a.coleccionable;
+  // Aumentar contador
+  J.coleccionables[tipo] += 1;
+  // Sumar puntos
+  J.puntos += a.puntos || 100;
+  // Actualizar HUD
+  $('contador-' + tipo).textContent = J.coleccionables[tipo];
+  $('contador-puntos').textContent = J.puntos;
+  // Encender el icono
+  $('hud-' + tipo).classList.add('activo');
+  // Mensaje
+  escribir(
+    `Coleccionable encontrado: ${a.nombre} (+${a.puntos || 100} puntos)`,
+    'aviso'
+  );
+  sonido.exito();
+}
 
 /* ---------- Ejecutar archivos ----------
    abrirArchivo() escribe un comando falso de Unix según la extensión y luego:
      - si el archivo tiene "accion", ejecuta esa regla de REGLAS
      - si no, muestra su "texto" en el visor */
 function abrirArchivo(a) {
+  //llamamos a la funcion para registrar coleccionables
+  registrarColeccionable(a);
   const ext = extension(a.nombre);
   // 💡 Operador ternario encadenado:  condición ? valorSiSí : valorSiNo
   //    Se lee como una cadena de "si... si no, si... si no...".
