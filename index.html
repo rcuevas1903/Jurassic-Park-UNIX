@@ -148,9 +148,8 @@
     #metros, #reloj { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     #reloj { font-size: 18px; font-weight: 500; min-width: 3.2em; text-align: right; }
     /* ---- Coleccionables para mejor puntuacion ---- */
-    #coleccionables{ display: flex; gap: 12px; align-items: center; font-family: var(--mono); font-size: 14px; }
-    .coleccionable-hud.activo{opacity:1; transform: scale(1.15);}
-    #puntos{color: var(--ambar); font-weight: 600;}
+    #coleccionables{display:flex;gap:12px;align-items:center;font-family:var(--mono);font-size:14px}.coleccionable-hud{display:inline-flex;align-items:center;gap:4px;opacity:.35;transition:opacity .25s,transform .25s}.coleccionable-hud.activo{opacity:1;transform:scale(1.15)}
+    #puntos{color:var(--ambar);font-weight:600}
 
     /* ---- Cartelito que aparece al pasar el mouse sobre algo ----
        pointer-events: none  hace que el mouse lo "atraviese" y no estorbe los clics */
@@ -272,8 +271,7 @@
         { nombre: 'raptores', archivos: [
           { nombre: 'estado.txt', tam: 0.9, texto: 'Recinto R-3\nCerca eléctrica: DESACTIVADA\nOcupantes esperados: 3\nOcupantes detectados: 0' },
           { nombre: 'comida.log', tam: 1.3, texto: 'Última alimentación: hace 26 horas.\n\nNota del cuidador: están inquietas. Muy inquietas.' },
-          { nombre: 'conducta.txt', tam: 1.9, texto: 'Observaciones:\n- prueban las cercas en lugares distintos cada día\n- nunca repiten el mismo punto\n- parecen recordar dónde está cada puerta' }
-        ]},
+          { nombre: 'conducta.txt', tam: 1.9, coleccionable: 'notas', puntos: 150, texto: 'Observaciones:\n- prueban las cercas en lugares distintos cada día\n- nunca repiten el mismo punto\n- parecen recordar dónde está cada puerta' }
         { nombre: 'herbivoros', archivos: [
           { nombre: 'estado.txt', tam: 0.9, texto: 'Recinto H-1\nCerca: DESACTIVADA\nOcupantes: 11 de 11\nComportamiento: comiendo helechos, sin preocupaciones.' },
           { nombre: 'manada.log', tam: 1.2, texto: 'La manada durmió junto al lago.\nNada que reportar.\nQué envidia.' },
@@ -282,7 +280,7 @@
       ]},
       { nombre: 'personal', hijos: [
         { nombre: 'tecnico_ruiz', archivos: [
-          { nombre: 'nota.txt', tam: 0.8, coleccionable: 'notas', puntos: 100,texto: 'Recordatorio para mí:\nya no uso mi fecha de nacimiento como clave.\nAhora es el nombre de mi perrita.\nNadie lo va a adivinar.' },
+          { nombre: 'nota.txt', tam: 0.8, coleccionable: 'notas', puntos: 100, texto: 'Recordatorio para mí:\nya no uso mi fecha de nacimiento como clave.\nAhora es el nombre de mi perrita.\nNadie lo va a adivinar.' },
           { nombre: 'perrita.jpg', tam: 2.0, texto: '[imagen]\nUna beagle sentada sobre el teclado de la sala de control.\nSu collar tiene una placa grabada: TRUFA.' },
           { nombre: 'arcade.exe', tam: 1.4, accion: 'arcade' }
         ]},
@@ -292,9 +290,9 @@
           { nombre: 'claves.txt', tam: 0.5, texto: 'Acceso denegado.\nEste archivo solo lo puede leer la directora.\n(Buen intento.)' }
         ]},
         { nombre: 'director_John', archivos: [
-          { nombre: 'memo.txt', tam: 1.1, texto: 'Memo interno\n\nTodas las cerraduras magnéticas del edificio dependen del generador principal.\nSi se va la luz, las puertas se quedan abiertas.\nYa pedí presupuesto para arreglarlo.' },
-          { nombre: 'agenda.txt', tam: 0.7, texto: 'Lunes: inspección de cercas\nMartes: visita de inversionistas\nMiércoles: recordarle a Ruiz lo de las claves (otra vez)' },
-          { nombre: 'claves.txt', tam: 0.5, texto: 'Acceso denegado.\nEste archivo solo lo puede leer la directora.\n(Buen intento.)' }
+        { nombre: 'memo.txt', tam: 1.1, coleccionable: 'notas', puntos: 200, texto: 'Memo interno\n\nTodas las cerraduras magnéticas del edificio dependen del generador principal.\nSi se va la luz, las puertas se quedan abiertas.\nYa pedí presupuesto para arreglarlo.' },   
+        { nombre: 'agenda.txt', tam: 0.7, texto: 'Lunes: inspección de cercas\nMartes: visita de inversionistas\nMiércoles: recordarle a Ruiz lo de las claves (otra vez)' },
+        { nombre: 'claves.txt', tam: 0.5, texto: 'Acceso denegado.\nEste archivo solo lo puede leer la directora.\n(Buen intento.)' }
         ]}
       ]}
     ]
@@ -569,27 +567,33 @@
   <div id="ruta"><span class="usuario">ruiz@control</span>:/isla-ambar $</div>
   <div id="estado">
     <span>Energía: <span id="energia" class="emergencia">emergencia</span></span>
-  </div>
-  <div id="coleccionables">
-    <span id="hud-notas" class="coleccionable-hud">
-    📄 </span id="contador notas">0</span>/3
-  </span>
-  <span id="hud-tarjetas" class="coleccionable-hud">
-    🪪 <span id="contador-tarjetas">0</span>/2
-  </span>
 
-  <span id="hud-adn" class="coleccionable-hud">
-    🧬 <span id="contador-adn">0</span>/3
-  </span>
+    <div id="coleccionables">
 
-  <span id="puntos">
-    Puntos: <span id="contador-puntos">0</span>
-  </span>
+      <span id="hud-notas" class="coleccionable-hud">
+        📄 <span id="contador-notas">0</span>/3
+      </span>
+
+      <span id="hud-tarjetas" class="coleccionable-hud">
+        🪪 <span id="contador-tarjetas">0</span>/2
+      </span>
+
+      <span id="hud-adn" class="coleccionable-hud">
+        🧬 <span id="contador-adn">0</span>/3
+      </span>
+
+      <span id="puntos">
+        Puntos: <span id="contador-puntos">0</span>
+      </span>
+
+    </div>
+
     <span class="medidor">
       <span>Pasillo</span>
       <span class="medidor-barra" aria-hidden="true"><span id="relleno"></span></span>
       <span id="metros">60 m</span>
     </span>
+
     <span id="reloj">3:00</span>
   </div>
 </div>
@@ -683,9 +687,9 @@ const J = {
   desbloqueadas: new Set(),     // carpetas con clave que ya abriste
   dirActual: null,
   avisosDados: new Set(),
-  pendiente: null               // lo que se hará al escribir bien la clave
+  pendiente: null,               // lo que se hará al escribir bien la clave
   // coleccionables
-  puntos:0, encontrados:new Set(), coleccionables:{notas:0, tarjetas:0, adn:0}
+  puntos: 0, encontrados:new Set(), coleccionables:{notas:0, tarjetas:0, adn:0}
 };
 // RAIZ = la carpeta principal; NODOS = lista de TODAS las carpetas (llegan en "sistema-listo")
 let RAIZ = null, NODOS = [];
@@ -860,30 +864,60 @@ function revisarClave() {
 }
 //funcion para registrar los coleccionables encontrados
 function registrarColeccionable(a) {
-   // Si el archivo no es coleccionable, termina
+
+  // Si el archivo no es coleccionable, termina
   if (!a.coleccionable) return;
-  // ID único = carpeta + nombre del archivo
-  const id = (a.dir ? a.dir.ruta : '') + '/' + a.nombre;
-  // Si ya fue encontrado, no vuelve a contar
-  if (J.encontrados.has(id)) return;
-  // Lo guardamos
-  J.encontrados.add(id);
+
   // Tipo de coleccionable: notas, tarjetas o adn
   const tipo = a.coleccionable;
+
+  // Si el tipo no existe en nuestro sistema de coleccionables, termina
+  if (!(tipo in J.coleccionables)) {
+    console.warn('Tipo de coleccionable desconocido:', tipo);
+    return;
+  }
+
+  // ID único = carpeta + nombre del archivo
+  const id = (a.dir ? a.dir.ruta : '') + '/' + a.nombre;
+
+  // Si ya fue encontrado, no vuelve a contar
+  if (J.encontrados.has(id)) return;
+
+  // Buscamos los elementos del HUD correspondientes
+  const contador = $('contador-' + tipo);
+  const icono = $('hud-' + tipo);
+
+  // Si falta algún elemento del HUD, termina para evitar errores
+  if (!contador || !icono) {
+    console.warn('Falta elemento del HUD para:', tipo);
+    return;
+  }
+
+  // Lo guardamos
+  J.encontrados.add(id);
+
   // Aumentar contador
   J.coleccionables[tipo] += 1;
+
+  // Puntos del coleccionable, si no tiene valor recibe 100
+  const puntos = a.puntos ?? 100;
+
   // Sumar puntos
-  J.puntos += a.puntos || 100;
+  J.puntos += puntos;
+
   // Actualizar HUD
-  $('contador-' + tipo).textContent = J.coleccionables[tipo];
+  contador.textContent = J.coleccionables[tipo];
   $('contador-puntos').textContent = J.puntos;
+
   // Encender el icono
-  $('hud-' + tipo).classList.add('activo');
+  icono.classList.add('activo');
+
   // Mensaje
   escribir(
-    `Coleccionable encontrado: ${a.nombre} (+${a.puntos || 100} puntos)`,
+    `Coleccionable encontrado: ${a.nombre} (+${puntos} puntos)`,
     'aviso'
   );
+
   sonido.exito();
 }
 
@@ -892,8 +926,10 @@ function registrarColeccionable(a) {
      - si el archivo tiene "accion", ejecuta esa regla de REGLAS
      - si no, muestra su "texto" en el visor */
 function abrirArchivo(a) {
+
   //llamamos a la funcion para registrar coleccionables
   registrarColeccionable(a);
+
   const ext = extension(a.nombre);
   // 💡 Operador ternario encadenado:  condición ? valorSiSí : valorSiNo
   //    Se lee como una cadena de "si... si no, si... si no...".
