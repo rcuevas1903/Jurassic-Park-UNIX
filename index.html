@@ -1110,12 +1110,29 @@ function terminar(gano) {
    💡 e.detail es el paquete de datos que mandó emit() en el componente.
    💡 const { nodo, archivo } = e.detail  es "desestructuración": saca esas dos
       propiedades del paquete y las guarda en variables con el mismo nombre. */
-escena.addEventListener('sistema-listo', e => {
-  RAIZ = e.detail.raiz;
-  NODOS = e.detail.nodos;
+// Inicializa el mundo cuando el componente sistema-archivos termina de construirlo
+function iniciarMundo(raiz, nodos) {
+  RAIZ = raiz;
+  NODOS = nodos;
   pintarPlataformas();
   volar(0, -NIVEL, RAIZ.anchoSub, true);
+}
+
+// Escuchamos el evento normal
+escena.addEventListener('sistema-listo', e => {
+  iniciarMundo(e.detail.raiz, e.detail.nodos);
 });
+
+// Si el componente terminó antes de que agregáramos el listener, lo recuperamos aquí
+const sistemaArchivos = document.querySelector('[sistema-archivos]');
+
+if (sistemaArchivos && sistemaArchivos.components['sistema-archivos']) {
+  const componente = sistemaArchivos.components['sistema-archivos'];
+
+  if (componente.nodos && componente.nodos.length > 0) {
+    iniciarMundo(ARBOL, componente.nodos);
+  }
+}
 
 escena.addEventListener('sobre', e => {
   const info = $('info');
