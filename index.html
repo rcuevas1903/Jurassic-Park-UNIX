@@ -240,6 +240,36 @@
     }
     .error-campo { color: var(--rojo); font-size: 14px; min-height: 1.4em; margin: 0 0 12px; }
     .fila-botones { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* ---- Ataque de los raptores (al perder) ----
+       Tres grupos de tres rasguños que se "dibujan" solos.
+       💡 pathLength="1" en cada línea hace que su largo valga 1; así animar
+          stroke-dashoffset de 1 a 0 la va trazando de principio a fin, sin importar su forma. */
+    .ataque { position: fixed; inset: 0; z-index: 60; pointer-events: none; animation: oscurecer 1s .6s both; }
+    .ataque[hidden] { display: none; }
+    .ataque svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .garra path {
+      fill: none; stroke: #f4ece0; stroke-width: 1.1; stroke-linecap: round;
+      stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0;
+      filter: drop-shadow(0 0 .8px #e0564a);
+      animation: rasgar .18s ease-out var(--d) both;
+    }
+    .garra path:nth-child(2) { animation-delay: calc(var(--d) + .04s); }
+    .garra path:nth-child(3) { animation-delay: calc(var(--d) + .08s); }
+    .destello { position: absolute; inset: 0; background: #ff2a1a; opacity: 0; animation: destello .45s .65s ease-out; }
+    @keyframes rasgar { 0% { stroke-dashoffset: 1; opacity: 0; } 1% { opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 1; } }
+    @keyframes destello { 0% { opacity: .75; } 100% { opacity: 0; } }
+    @keyframes oscurecer { from { background: rgba(90, 0, 0, 0); } to { background: rgba(90, 0, 0, .5); } }
+    @keyframes sacudida {
+      0%, 100% { transform: none; } 20% { transform: translate(-9px, 6px); } 40% { transform: translate(8px, -7px); }
+      60% { transform: translate(-6px, -5px); } 80% { transform: translate(6px, 7px); }
+    }
+    a-scene.sacudida { animation: sacudida .45s .65s 2; }
+    /* Para quien prefiere menos movimiento: sin destello ni sacudida */
+    @media (prefers-reduced-motion: reduce) {
+      .destello { display: none; }
+      a-scene.sacudida { animation: none; }
+    }
   </style>
 
   <script>
@@ -679,6 +709,21 @@
   </div>
 </div>
 
+<div id="ataque" class="ataque" hidden aria-hidden="true">
+  <div class="destello"></div>
+  <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+    <g class="garra" style="--d:.35s">
+      <path pathLength="1" d="M68 -2 Q 58 40 38 102"/><path pathLength="1" d="M76 -2 Q 66 40 46 102"/><path pathLength="1" d="M84 -2 Q 74 40 54 102"/>
+    </g>
+    <g class="garra" style="--d:.55s">
+      <path pathLength="1" d="M10 -2 Q 28 40 56 102"/><path pathLength="1" d="M18 -2 Q 36 40 64 102"/><path pathLength="1" d="M26 -2 Q 44 40 72 102"/>
+    </g>
+    <g class="garra" style="--d:.75s">
+      <path pathLength="1" d="M-2 28 Q 45 38 102 72"/><path pathLength="1" d="M-2 36 Q 45 46 102 80"/><path pathLength="1" d="M-2 44 Q 45 54 102 88"/>
+    </g>
+  </svg>
+</div>
+
 <div id="final" class="velo" hidden>
   <div class="tarjeta panel">
     <h1 id="final-titulo"></h1>
@@ -812,7 +857,31 @@ const sonido = {
   arranque:() => [220, 277, 330, 440, 554, 660].forEach((f, i) => tono(f, 0.35, 'sawtooth', 0.04, i * 0.4)),
   gruñido: () => { ruido(1.3, 260, 'lowpass', 0.5); tono(62, 1.1, 'sawtooth', 0.05); },
   golpe:   () => { tono(55, 0.25, 'sine', 0.5); tono(50, 0.25, 'sine', 0.5, 0.35); },
-  rasguño: () => { for (let i = 0; i < 6; i++) ruido(0.07, 2800, 'highpass', 0.25, i * 0.11); }
+  rasguño: () => { for (let i = 0; i < 6; i++) ruido(0.07, 2800, 'highpass', 0.25, i * 0.11); },
+  // Grito de raptor: dos voces "dentadas" que suben de golpe y bajan despacio, con un
+  // vibrato rápido (el LFO) y un filtro que las vuelve chillonas. Suena parecido a un chillido de ave.
+  grito: () => {
+    const a = ctxAudio(); if (!a) return;
+    const t = a.currentTime;
+    const filtro = a.createBiquadFilter(), vol = a.createGain();
+    filtro.type = 'bandpass'; filtro.frequency.value = 1500; filtro.Q.value = 0.8;
+    vol.gain.setValueAtTime(0.0001, t);
+    vol.gain.linearRampToValueAtTime(0.14, t + 0.06);
+    vol.gain.exponentialRampToValueAtTime(0.0001, t + 1.5);
+    filtro.connect(vol).connect(a.destination);
+    [1, 1.5].forEach(mult => {
+      const o = a.createOscillator(), vib = a.createOscillator(), vibVol = a.createGain();
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(450 * mult, t);
+      o.frequency.exponentialRampToValueAtTime(1700 * mult, t + 0.22);
+      o.frequency.exponentialRampToValueAtTime(600 * mult, t + 1.4);
+      vib.frequency.value = 42; vibVol.gain.value = 70 * mult;
+      vib.connect(vibVol).connect(o.frequency);   // el vibrato mueve la frecuencia de la voz
+      o.connect(filtro);
+      o.start(t); vib.start(t); o.stop(t + 1.55); vib.stop(t + 1.55);
+    });
+    ruido(1.2, 2200, 'highpass', 0.18);
+  }
 };
 
 
@@ -1125,6 +1194,16 @@ function iniciar() {
   escribir('Las plataformas son carpetas y los bloques son archivos.', 'tenue');
   requestAnimationFrame(cadaCuadro);
 }
+/* Secuencia al perder (todo en milisegundos desde que se acaba el tiempo):
+     0 golpe en la puerta · 350 primeros rasguños · 650 grito, destello y sacudida
+   💡 Los tiempos del CSS (.garra, .destello, a-scene.sacudida) están puestos para coincidir con estos. */
+function animacionAtaque() {
+  $('ataque').hidden = false;
+  escena.classList.add('sacudida');
+  sonido.golpe();
+  setTimeout(sonido.rasguño, 350);
+  setTimeout(sonido.grito, 650);
+}
 function terminar(gano) {
   if (J.fin) return;
   J.fin = true; J.activo = false;
@@ -1147,14 +1226,14 @@ function terminar(gano) {
       $('final-record').textContent = `Tu mejor marca: ${mejor} segundos de sobra.` + puntos;
     }
   } else {
-    sonido.gruñido();
+    animacionAtaque();
     $('final-titulo').textContent = 'Demasiado tarde';
     $('final-texto').textContent = J.energia
       ? 'Restauraste la energía, pero la puerta seguía abierta. La cerradura de la sala de control estaba a un clic.'
       : 'La puerta se abrió. Sin energía, ninguna cerradura del edificio podía responder.';
     $('final-record').textContent = puntos.trim();
   }
-  setTimeout(() => { $('final').hidden = false; $('btn-otra').focus(); }, gano ? 600 : 1200);
+  setTimeout(() => { $('ataque').hidden = true; escena.classList.remove('sacudida'); $('final').hidden = false; $('btn-otra').focus(); }, gano ? 600 : 2800);
 }
 
 
