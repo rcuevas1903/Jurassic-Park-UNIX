@@ -40,19 +40,20 @@
      💡  explicación de un truco o una idea de programación
 
    RETOS PARA PRACTICAR (de fácil a difícil)
-     1. Cambia DURACION a 90 segundos para hacerlo más difícil.
+     1. Cambia las duraciones del selector de dificultad (en la portada).
      2. Agrega un archivo .txt nuevo con una pista falsa en alguna carpeta.
      3. Agrega una carpeta nueva completa dentro de "personal".
      4. Crea una regla nueva en REGLAS (por ejemplo, un archivo que te regale
         20 segundos) y úsala con "accion" en un archivo del ARBOL.
      5. Haz que la carpeta "camaras" también pida clave, con otra pista escondida.
+     6. Agrega archivos con coleccionable: 'tarjetas' o 'adn' (el HUD ya los cuenta).
 =====================================================================================
 -->
 <html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Reserva Isla Nublar — sistema de control</title>
+  <title>Reserva Isla Ámbar — sistema de control</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;600&display=swap" rel="stylesheet">
@@ -147,9 +148,11 @@
     #relleno.critico { background: var(--rojo); }
     #metros, #reloj { font-family: var(--mono); font-variant-numeric: tabular-nums; }
     #reloj { font-size: 18px; font-weight: 500; min-width: 3.2em; text-align: right; }
-    /* ---- Coleccionables para mejor puntuacion ---- */
-    #coleccionables{display:flex;gap:12px;align-items:center;font-family:var(--mono);font-size:14px}.coleccionable-hud{display:inline-flex;align-items:center;gap:4px;opacity:.35;transition:opacity .25s,transform .25s}.coleccionable-hud.activo{opacity:1;transform:scale(1.15)}
-    #puntos{color:var(--ambar);font-weight:600}
+    /* ---- Coleccionables para mejor puntuación ---- */
+    #coleccionables { display: flex; gap: 12px; align-items: center; font-family: var(--mono); font-size: 14px; }
+    .coleccionable-hud { display: inline-flex; align-items: center; gap: 4px; opacity: .35; transition: opacity .25s, transform .25s; }
+    .coleccionable-hud.activo { opacity: 1; transform: scale(1.15); }
+    #puntos { color: var(--ambar); font-weight: 600; }
 
     /* ---- Cartelito que aparece al pasar el mouse sobre algo ----
        pointer-events: none  hace que el mouse lo "atraviese" y no estorbe los clics */
@@ -186,7 +189,8 @@
     }
     button:hover { background: var(--boton-hover); }
     button:active { border-color: var(--panel-borde-oscuro) var(--panel-borde-claro) var(--panel-borde-claro) var(--panel-borde-oscuro); }
-    button:focus-visible, input:focus-visible { outline: 2px solid var(--ambar); outline-offset: 2px; }
+    button:disabled { opacity: .5; cursor: wait; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--ambar); outline-offset: 2px; }
     button.principal { background: var(--ambar); color: var(--texto-principal); font-size: 17px; padding: 10px 26px; }
 
     /* ---- Visor de archivos (derecha). Está oculto (display: none) hasta que
@@ -217,7 +221,7 @@
       padding-top: calc(20px + env(safe-area-inset-top, 0px)); padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     }
     .velo[hidden] { display: none; }
-    .tarjeta { max-width: 36em; padding: 28px 30px; }
+    .tarjeta { max-width: 36em; max-height: 100%; overflow-y: auto; padding: 28px 30px; }
     .tarjeta h1 { font-family: var(--sans); font-weight: 600; font-size: clamp(30px, 6vw, 46px); line-height: 1.05; margin: 0 0 4px; letter-spacing: -0.01em; }
     .tarjeta h2 { font-family: var(--sans); font-weight: 600; font-size: 26px; margin: 0 0 10px; }
     .subtitulo { font-family: var(--mono); font-size: 14px; color: var(--texto-tenue); margin: 0 0 20px; }
@@ -226,6 +230,12 @@
     .tarjeta input {
       width: 100%; font-family: var(--mono); font-size: 18px; padding: 8px 10px; margin: 6px 0 4px;
       background: transparent; color: var(--texto); border: 1px solid var(--texto-tenue); border-radius: 2px; text-transform: uppercase;
+    }
+    /* Selector de dificultad de la portada */
+    .fila-dificultad { display: flex; align-items: center; gap: 10px; margin: 0 0 20px; font-size: 16px; }
+    .tarjeta select {
+      font-family: var(--mono); font-size: 15px; padding: 6px 8px; color: var(--texto);
+      background: var(--boton); border: 1px solid var(--texto-tenue); border-radius: 2px;
     }
     .error-campo { color: var(--rojo); font-size: 14px; min-height: 1.4em; margin: 0 0 12px; }
     .fila-botones { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -239,6 +249,7 @@
         tam      altura del bloque, en metros
         texto    lo que se ve al abrirlo       (opcional)
         accion   una regla especial del juego  (opcional, ver el script final)
+        coleccionable  'notas', 'tarjetas' o 'adn' (opcional) y puntos (opcional)
      Una carpeta con "clave" pide contraseña antes de dejarte usarla.
      ===================================================================== */
   const ARBOL = {
@@ -253,7 +264,7 @@
           { nombre: 'telefonos.sys', tam: 1.0, texto: 'Líneas externas: sin señal.\nCausa probable: tormenta tropical sobre la isla.\nPróximo barco de suministros: en 3 días.' },
           { nombre: 'firewall.cfg', tam: 0.6, texto: 'permitir  control -> puertas\npermitir  control -> camaras\nbloquear  todo lo demás\n\n# no tocar sin permiso de la directora' },
           { nombre: 'correo.log', tam: 1.6, texto: 'De: directora_vega\nPara: tecnico_ruiz\nAsunto: tus claves\n\nRuiz, deja de usar claves obvias.\nY ya te dije que no quiero fotos de tu perrita en el servidor.' }
-        ]}
+        ]},
       ]},
       { nombre: 'seguridad', hijos: [
         { nombre: 'puertas', clave: 'TRUFA', archivos: [
@@ -265,18 +276,19 @@
           { nombre: 'pasillo.cam', tam: 1.8, accion: 'camPasillo' },
           { nombre: 'cocina.cam', tam: 1.2, texto: 'Cámara de la cocina:\nsin movimiento.\nUna charola de pan dulce intacta sobre la mesa.' },
           { nombre: 'recinto.cam', tam: 1.5, texto: 'Cámara del recinto R-3:\nreja abierta.\nHuellas de tres pares de patas que salen hacia el edificio de visitantes.' }
-        ]}
+        ]},
       ]},
       { nombre: 'recintos', hijos: [
         { nombre: 'raptores', archivos: [
           { nombre: 'estado.txt', tam: 0.9, texto: 'Recinto R-3\nCerca eléctrica: DESACTIVADA\nOcupantes esperados: 3\nOcupantes detectados: 0' },
           { nombre: 'comida.log', tam: 1.3, texto: 'Última alimentación: hace 26 horas.\n\nNota del cuidador: están inquietas. Muy inquietas.' },
           { nombre: 'conducta.txt', tam: 1.9, coleccionable: 'notas', puntos: 150, texto: 'Observaciones:\n- prueban las cercas en lugares distintos cada día\n- nunca repiten el mismo punto\n- parecen recordar dónde está cada puerta' }
+        ]},
         { nombre: 'herbivoros', archivos: [
           { nombre: 'estado.txt', tam: 0.9, texto: 'Recinto H-1\nCerca: DESACTIVADA\nOcupantes: 11 de 11\nComportamiento: comiendo helechos, sin preocupaciones.' },
           { nombre: 'manada.log', tam: 1.2, texto: 'La manada durmió junto al lago.\nNada que reportar.\nQué envidia.' },
           { nombre: 'dieta.txt', tam: 0.6, texto: 'Helechos: 400 kg por día.\nAgua: mucha.\nPresupuesto: insuficiente.' }
-        ]}
+        ]},
       ]},
       { nombre: 'personal', hijos: [
         { nombre: 'tecnico_ruiz', archivos: [
@@ -290,11 +302,11 @@
           { nombre: 'claves.txt', tam: 0.5, texto: 'Acceso denegado.\nEste archivo solo lo puede leer la directora.\n(Buen intento.)' }
         ]},
         { nombre: 'director_John', archivos: [
-        { nombre: 'memo.txt', tam: 1.1, coleccionable: 'notas', puntos: 200, texto: 'Memo interno\n\nTodas las cerraduras magnéticas del edificio dependen del generador principal.\nSi se va la luz, las puertas se quedan abiertas.\nYa pedí presupuesto para arreglarlo.' },   
-        { nombre: 'agenda.txt', tam: 0.7, texto: 'Lunes: inspección de cercas\nMartes: visita de inversionistas\nMiércoles: recordarle a Ruiz lo de las claves (otra vez)' },
-        { nombre: 'claves.txt', tam: 0.5, texto: 'Acceso denegado.\nEste archivo solo lo puede leer la directora.\n(Buen intento.)' }
-        ]}
-      ]}
+          { nombre: 'memo.txt', tam: 1.1, coleccionable: 'notas', puntos: 200, texto: 'Memo interno\n\nTodas las cerraduras magnéticas del edificio dependen del generador principal.\nSi se va la luz, las puertas se quedan abiertas.\nYa pedí presupuesto para arreglarlo.' },
+          { nombre: 'agenda.txt', tam: 0.7, texto: 'Lunes: inspección de cercas\nMartes: visita de inversionistas\nMiércoles: recordarle a Ruiz lo de las claves (otra vez)' },
+          { nombre: 'claves.txt', tam: 0.5, texto: 'Acceso denegado.\nEste archivo solo lo puede leer la directora.\n(Buen intento.)' }
+        ]},
+      ]},
     ]
   };
 
@@ -615,23 +627,25 @@
 
 <div id="portada" class="velo">
   <div class="tarjeta panel">
-    <h1>Reserva Isla Nublar</h1>
+    <h1>Reserva Isla Ámbar</h1>
     <p class="subtitulo">Sistema de control del centro de visitantes</p>
     <p>La tormenta tumbó la energía y las cerraduras de la sala de control quedaron abiertas.
        En la cámara del pasillo se ve algo acercándose.</p>
-    <p>Tienes tres minutos para encontrar en el sistema cómo volver a cerrar la puerta.</p>
+    <p>Encuentra en el sistema cómo volver a cerrar la puerta antes de que se acabe el tiempo.</p>
     <ul>
       <li>Haz clic en una plataforma para volar a esa carpeta.</li>
       <li>Haz clic en un bloque para abrir o ejecutar ese archivo.</li>
       <li>La altura de cada bloque es el tamaño del archivo.</li>
     </ul>
-    <label for="dificultad">Dificultad</label>
-    <select id="dificultad">
-      <option value="300" data-metros="100">Fácil (5 min)</option>
-      <option value="180" data-metros="60" selected>Normal (3 min)</option>
-      <option value="90" data-metros="30" >Difícil (1.5 min)</option>
-    </select>
-    <button id="btn-iniciar" class="principal">Iniciar sistema</button>
+    <div class="fila-dificultad">
+      <label for="dificultad">Dificultad</label>
+      <select id="dificultad">
+        <option value="300" data-metros="100">Fácil (5 min)</option>
+        <option value="180" data-metros="60" selected>Normal (3 min)</option>
+        <option value="90" data-metros="30">Difícil (1.5 min)</option>
+      </select>
+    </div>
+    <button id="btn-iniciar" class="principal" disabled>Cargando sistema...</button>
   </div>
 </div>
 
@@ -675,24 +689,42 @@ const rig = document.getElementById('rig');
 // 💡 $ es solo un nombre corto: $('reloj') hace lo mismo que document.getElementById('reloj')
 const $ = id => document.getElementById(id);
 
-let DURACION = 180;           // ✏️ segundos para ganar
-let METROS_INICIALES = 60;    // a qué distancia empiezan los raptores
+let DURACION = 180;           // ✏️ segundos para ganar (el selector de la portada lo cambia)
+let METROS_INICIALES = 60;    // a qué distancia empiezan los raptores (también lo cambia el selector)
 
 /* ---------- Estado del juego ----------
    💡 Todo lo que "recuerda" el juego vive en este objeto J. Si algo se rompe,
       puedes abrir la consola del navegador (F12) y escribir J para ver cómo va. */
 const J = {
   activo: false, fin: false, inicio: 0, restante: DURACION,
-  energia: false,
+  energia: false, arrancando: false,
   desbloqueadas: new Set(),     // carpetas con clave que ya abriste
   dirActual: null,
   avisosDados: new Set(),
   pendiente: null,               // lo que se hará al escribir bien la clave
   // coleccionables
-  puntos: 0, encontrados:new Set(), coleccionables:{notas:0, tarjetas:0, adn:0}
+  puntos: 0, encontrados: new Set(), coleccionables: { notas: 0, tarjetas: 0, adn: 0 }
 };
 // RAIZ = la carpeta principal; NODOS = lista de TODAS las carpetas (llegan en "sistema-listo")
 let RAIZ = null, NODOS = [];
+
+
+/* ---------- Dificultad ----------
+   💡 Una sola función lee el selector y actualiza duración, metros y los
+      números de la barra. Se llama al cargar la página, al cambiar el selector
+      y al iniciar. Así nunca quedan desfasados, aunque el navegador restaure
+      el valor del selector sin avisar (pasa en Firefox al recargar). */
+function formatoTiempo(seg) {
+  return Math.floor(seg / 60) + ':' + String(seg % 60).padStart(2, '0');
+}
+function aplicarDificultad() {
+  const sel = $('dificultad');
+  DURACION = Number(sel.value);
+  METROS_INICIALES = Number(sel.selectedOptions[0].dataset.metros);
+  J.restante = DURACION;
+  $('reloj').textContent = formatoTiempo(DURACION);
+  $('metros').textContent = METROS_INICIALES + ' m';
+}
 
 
 /* ---------- La consola ----------
@@ -862,9 +894,11 @@ function revisarClave() {
   sonido.exito();
   p.despues();
 }
-//funcion para registrar los coleccionables encontrados
-function registrarColeccionable(a) {
 
+/* ---------- Coleccionables ----------
+   Registra un archivo coleccionable la primera vez que se abre: suma al
+   contador de su tipo (notas, tarjetas, adn), suma puntos y enciende su ícono. */
+function registrarColeccionable(a) {
   // Si el archivo no es coleccionable, termina
   if (!a.coleccionable) return;
 
@@ -893,31 +927,20 @@ function registrarColeccionable(a) {
     return;
   }
 
-  // Lo guardamos
+  // Lo guardamos y aumentamos el contador
   J.encontrados.add(id);
-
-  // Aumentar contador
   J.coleccionables[tipo] += 1;
 
-  // Puntos del coleccionable, si no tiene valor recibe 100
+  // Puntos del coleccionable; si no tiene valor, recibe 100
   const puntos = a.puntos ?? 100;
-
-  // Sumar puntos
   J.puntos += puntos;
 
   // Actualizar HUD
   contador.textContent = J.coleccionables[tipo];
   $('contador-puntos').textContent = J.puntos;
-
-  // Encender el icono
   icono.classList.add('activo');
 
-  // Mensaje
-  escribir(
-    `Coleccionable encontrado: ${a.nombre} (+${puntos} puntos)`,
-    'aviso'
-  );
-
+  escribir(`Coleccionable encontrado: ${a.nombre} (+${puntos} puntos)`, 'aviso');
   sonido.exito();
 }
 
@@ -927,7 +950,7 @@ function registrarColeccionable(a) {
      - si no, muestra su "texto" en el visor */
 function abrirArchivo(a) {
 
-  //llamamos a la funcion para registrar coleccionables
+  // Primero registramos el coleccionable (si lo es)
   registrarColeccionable(a);
 
   const ext = extension(a.nombre);
@@ -980,9 +1003,12 @@ const REGLAS = {
   },
   camPasillo(a) {
     const m = metros();
+    // 💡 Los límites se escalan con la dificultad (ESCALA = 1 en Normal),
+    //    para que el mensaje coincida con la distancia que se ve en la barra.
+    const esc = METROS_INICIALES / 60;
     // El mensaje de la cámara cambia según qué tan cerca estén los raptores
-    const texto = m > 40 ? `Pasillo B: movimiento detectado a ${m} m de la sala de control.\nDemasiado rápido para ser una persona.`
-                : m > 15 ? `Pasillo B: tres siluetas a ${m} m.\nSe mueven por turnos, como si se cubrieran entre ellas.`
+    const texto = m > 40 * esc ? `Pasillo B: movimiento detectado a ${m} m de la sala de control.\nDemasiado rápido para ser una persona.`
+                : m > 15 * esc ? `Pasillo B: tres siluetas a ${m} m.\nSe mueven por turnos, como si se cubrieran entre ellas.`
                 : `Pasillo B: vacío.\nEso significa que ya están frente a tu puerta.`;
     mostrar(a.nombre, texto);
   },
@@ -1026,7 +1052,10 @@ function pintarPlataformas() {
 const metros = () => Math.max(0, Math.ceil(METROS_INICIALES * J.restante / DURACION));
 // J.avisosDados (un Set = lista sin repetidos) recuerda qué eventos ya pasaron,
 // para que cada uno suene una sola vez.
-const EVENTOS = [   // ✏️ cosas que pasan cuando los raptores llegan a cierta distancia
+// ✏️ cosas que pasan cuando los raptores llegan a cierta distancia.
+//    "m" está pensado para la dificultad Normal (60 m); en Fácil y Difícil se
+//    escala solo, así los eventos nunca se disparan todos juntos al empezar.
+const EVENTOS = [
   { m: 45, texto: 'camview: movimiento en el pasillo B.', sonido: 'gruñido' },
   { m: 30, texto: 'Algo golpeó la puerta del pasillo B.', sonido: 'golpe' },
   { m: 15, texto: 'Se oyen rasguños del otro lado de la puerta.', sonido: 'rasguño' },
@@ -1037,13 +1066,12 @@ function cadaCuadro() {
   J.restante = Math.max(0, DURACION - (performance.now() - J.inicio) / 1000);
   const m = metros();
   const seg = Math.ceil(J.restante);
-  // Minutos:segundos. padStart(2,'0') convierte 5 en "05" → "2:05"
-  $('reloj').textContent = Math.floor(seg / 60) + ':' + String(seg % 60).padStart(2, '0');
+  $('reloj').textContent = formatoTiempo(seg);
   $('metros').textContent = m + ' m';
   $('relleno').style.width = (100 * J.restante / DURACION) + '%';
-  $('relleno').classList.toggle('critico', m <= 15);
+  $('relleno').classList.toggle('critico', m <= 15 * METROS_INICIALES / 60);
   EVENTOS.forEach(ev => {
-    if (m <= ev.m && !J.avisosDados.has(ev)) {
+    if (m <= ev.m * METROS_INICIALES / 60 && !J.avisosDados.has(ev)) {
       J.avisosDados.add(ev);
       escribir(ev.texto, 'error');
       sonido[ev.sonido]();
@@ -1059,11 +1087,11 @@ function cadaCuadro() {
               portada, guarda la hora de inicio y arranca el reloj.
    terminar(gano): detiene todo y muestra la pantalla final.
    💡 localStorage guarda datos en el navegador aunque cierres la página
-      (aquí, tu mejor tiempo). Va dentro de try/catch porque algunos
-      navegadores lo bloquean; si falla, el juego sigue sin récord. */
+      (aquí, tu mejor tiempo por dificultad). Va dentro de try/catch porque
+      algunos navegadores lo bloquean; si falla, el juego sigue sin récord. */
 function iniciar() {
-  DURACION = Number($('dificultad').value); //se sgrega la variable de dificultad
-  J.restante = DURACION;
+  if (!RAIZ) return;            // el mundo todavía no está construido
+  aplicarDificultad();          // lee duración Y metros del selector
   ctxAudio();
   $('portada').hidden = true;
   $('portada').style.display = 'none';
@@ -1080,18 +1108,21 @@ function terminar(gano) {
   J.fin = true; J.activo = false;
   $('ventana-clave').hidden = true;
   const seg = Math.ceil(J.restante);
+  const puntos = J.puntos ? ` Puntos: ${J.puntos}.` : '';
   if (gano) {
     sonido.exito();
     setTimeout(sonido.rasguño, 900);
     $('final-titulo').textContent = 'Puerta asegurada';
     $('final-texto').textContent = `Los cerrojos se activaron con ${seg} segundos de sobra. Del otro lado de la puerta, algo sigue rasguñando.`;
+    // El récord se guarda por dificultad, para no comparar 5 minutos con 1.5
+    const llave = 'isla-ambar-mejor-' + DURACION;
     let mejor = 0;
-    try { mejor = Number(localStorage.getItem('isla-ambar-mejor')) || 0; } catch (e) {}
+    try { mejor = Number(localStorage.getItem(llave)) || 0; } catch (e) {}
     if (seg > mejor) {
-      try { localStorage.setItem('isla-ambar-mejor', String(seg)); } catch (e) {}
-      $('final-record').textContent = 'Nuevo récord en este navegador.';
+      try { localStorage.setItem(llave, String(seg)); } catch (e) {}
+      $('final-record').textContent = 'Nuevo récord en este navegador.' + puntos;
     } else {
-      $('final-record').textContent = `Tu mejor marca: ${mejor} segundos de sobra.`;
+      $('final-record').textContent = `Tu mejor marca: ${mejor} segundos de sobra.` + puntos;
     }
   } else {
     sonido.gruñido();
@@ -1099,7 +1130,7 @@ function terminar(gano) {
     $('final-texto').textContent = J.energia
       ? 'Restauraste la energía, pero la puerta seguía abierta. La cerradura de la sala de control estaba a un clic.'
       : 'La puerta se abrió. Sin energía, ninguna cerradura del edificio podía responder.';
-    $('final-record').textContent = '';
+    $('final-record').textContent = puntos.trim();
   }
   setTimeout(() => { $('final').hidden = false; $('btn-otra').focus(); }, gano ? 600 : 1200);
 }
@@ -1116,6 +1147,9 @@ function iniciarMundo(raiz, nodos) {
   NODOS = nodos;
   pintarPlataformas();
   volar(0, -NIVEL, RAIZ.anchoSub, true);
+  // Ya se puede jugar: activamos el botón de la portada
+  $('btn-iniciar').disabled = false;
+  $('btn-iniciar').textContent = 'Iniciar sistema';
 }
 
 // Escuchamos el evento normal
@@ -1166,14 +1200,8 @@ escena.addEventListener('elegir-archivo', e => {
   entrarCarpeta(n, true);
   abrirArchivo(a);
 });
-$('dificultad').addEventListener('change', () => {
-  METROS_INICIALES = Number($('dificultad').selectedOptions[0].dataset.metros);
-  DURACION = Number($('dificultad').value);
-  J.restante = DURACION;
-
-  $('reloj').textContent = Math.floor(DURACION / 60) + ':' + String(DURACION % 60).padStart(2, '0');
-  $('metros').textContent = METROS_INICIALES + ' m';
-});
+$('dificultad').addEventListener('change', aplicarDificultad);
+aplicarDificultad();   // también al cargar: el navegador puede restaurar un valor distinto del selector
 $('btn-iniciar').addEventListener('click', iniciar);
 $('btn-subir').addEventListener('click', () => { if (J.activo) { sonido.clic(); subir(); } });
 $('btn-general').addEventListener('click', () => { if (J.activo) { sonido.clic(); vistaGeneral(); escribir('$ cd /isla-ambar', 'cmd'); listar(RAIZ); } });
