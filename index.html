@@ -46,7 +46,8 @@
      4. Crea una regla nueva en REGLAS (por ejemplo, un archivo que te regale
         20 segundos) y úsala con "accion" en un archivo del ARBOL.
      5. Haz que la carpeta "camaras" también pida clave, con otra pista escondida.
-     6. Agrega archivos con coleccionable: 'tarjetas' o 'adn' (el HUD ya los cuenta).
+     6. Agrega un ADN o una tarjeta más (coleccionable: 'adn' o 'tarjetas') y sube
+        el máximo del contador en el HUD (/2 y /3).
 =====================================================================================
 -->
 <html lang="es">
@@ -282,26 +283,31 @@
         { nombre: 'raptores', archivos: [
           { nombre: 'estado.txt', tam: 0.9, texto: 'Recinto R-3\nCerca eléctrica: DESACTIVADA\nOcupantes esperados: 3\nOcupantes detectados: 0' },
           { nombre: 'comida.log', tam: 1.3, texto: 'Última alimentación: hace 26 horas.\n\nNota del cuidador: están inquietas. Muy inquietas.' },
-          { nombre: 'conducta.txt', tam: 1.9, coleccionable: 'notas', puntos: 150, texto: 'Observaciones:\n- prueban las cercas en lugares distintos cada día\n- nunca repiten el mismo punto\n- parecen recordar dónde está cada puerta' }
+          { nombre: 'conducta.txt', tam: 1.9, coleccionable: 'notas', puntos: 150, texto: 'Observaciones:\n- prueban las cercas en lugares distintos cada día\n- nunca repiten el mismo punto\n- parecen recordar dónde está cada puerta' },
+          { nombre: 'muestra_r3.dna', tam: 0.8, coleccionable: 'adn', puntos: 50, texto: 'Muestra R-3: raptor, hembra.\nHuecos de la secuencia rellenados con ADN de aves modernas.\n\nDato: por eso las crías nacen con plumas en la cola y no solo escamas.' }
         ]},
         { nombre: 'herbivoros', archivos: [
           { nombre: 'estado.txt', tam: 0.9, texto: 'Recinto H-1\nCerca: DESACTIVADA\nOcupantes: 11 de 11\nComportamiento: comiendo helechos, sin preocupaciones.' },
           { nombre: 'manada.log', tam: 1.2, texto: 'La manada durmió junto al lago.\nNada que reportar.\nQué envidia.' },
-          { nombre: 'dieta.txt', tam: 0.6, texto: 'Helechos: 400 kg por día.\nAgua: mucha.\nPresupuesto: insuficiente.' }
+          { nombre: 'dieta.txt', tam: 0.6, texto: 'Helechos: 400 kg por día.\nAgua: mucha.\nPresupuesto: insuficiente.' },
+          { nombre: 'muestra_h1.dna', tam: 0.8, coleccionable: 'adn', puntos: 50, texto: 'Muestra H-1: herbívoro de cuello largo.\nSecuencia recuperada: 61%.\n\nDato: su corazón debía bombear sangre a más de 8 m de altura, con una presión arterial mayor que la de cualquier animal actual.' }
         ]},
       ]},
       { nombre: 'personal', hijos: [
         { nombre: 'tecnico_ruiz', archivos: [
           { nombre: 'nota.txt', tam: 0.8, coleccionable: 'notas', puntos: 100, texto: 'Recordatorio para mí:\nya no uso mi fecha de nacimiento como clave.\nAhora es el nombre de mi perrita.\nNadie lo va a adivinar.' },
           { nombre: 'perrita.jpg', tam: 2.0, texto: '[imagen]\nUna beagle sentada sobre el teclado de la sala de control.\nSu collar tiene una placa grabada: TRUFA.' },
-          { nombre: 'arcade.exe', tam: 1.4, accion: 'arcade' }
+          { nombre: 'arcade.exe', tam: 1.4, accion: 'arcade' },
+          { nombre: 'tarjeta_ruiz.id', tam: 0.6, accion: 'tarjeta', coleccionable: 'tarjetas', puntos: 100, texto: 'TARJETA DE ACCESO\nTitular: Ruiz, técnico de sistemas\nNivel: 2\n\nAl reverso, escrito a mano:\n"puertas = nombre de mi perrita"' }
         ]},
         { nombre: 'directora_vega', archivos: [
+          { nombre: 'tarjeta_vega.id', tam: 0.6, accion: 'tarjeta', coleccionable: 'tarjetas', puntos: 100, texto: 'TARJETA DE ACCESO\nTitular: Vega, directora\nNivel: 5\n\nPegado al reverso, un papelito de Ruiz:\n"Directora, la clave de las puertas, por si se va la luz."' },
           { nombre: 'memo.txt', tam: 1.1, texto: 'Memo interno\n\nTodas las cerraduras magnéticas del edificio dependen del generador principal.\nSi se va la luz, las puertas se quedan abiertas.\nYa pedí presupuesto para arreglarlo.' },
           { nombre: 'agenda.txt', tam: 0.7, texto: 'Lunes: inspección de cercas\nMartes: visita de inversionistas\nMiércoles: recordarle a Ruiz lo de las claves (otra vez)' },
           { nombre: 'claves.txt', tam: 0.5, texto: 'Acceso denegado.\nEste archivo solo lo puede leer la directora.\n(Buen intento.)' }
         ]},
         { nombre: 'director_John', archivos: [
+          { nombre: 'ambar.dna', tam: 0.8, coleccionable: 'adn', puntos: 50, texto: 'Muestra A-01: mosquito fosilizado en ámbar, unos 90 millones de años.\n\nDato: el ADN se degrada tan rápido que su vida media es de unos 521 años. En condiciones normales no sobreviviría ni un millón de años.' },
           { nombre: 'memo.txt', tam: 1.1, coleccionable: 'notas', puntos: 200, texto: 'Memo interno\n\nTodas las cerraduras magnéticas del edificio dependen del generador principal.\nSi se va la luz, las puertas se quedan abiertas.\nYa pedí presupuesto para arreglarlo.' },
           { nombre: 'agenda.txt', tam: 0.7, texto: 'Lunes: inspección de cercas\nMartes: visita de inversionistas\nMiércoles: recordarle a Ruiz lo de las claves (otra vez)' },
           { nombre: 'claves.txt', tam: 0.5, texto: 'Acceso denegado.\nEste archivo solo lo puede leer la directora.\n(Buen intento.)' }
@@ -317,7 +323,8 @@
     txt: { color: '#8fd3f4', nombre: 'texto' },      log: { color: '#6fc2a0', nombre: 'bitácora' },
     lck: { color: '#e2574c', nombre: 'cerradura' },  cam: { color: '#b88ce8', nombre: 'cámara' },
     sys: { color: '#c9d4e3', nombre: 'sistema' },    cfg: { color: '#aab8cc', nombre: 'configuración' },
-    jpg: { color: '#f2b8cf', nombre: 'imagen' }
+    jpg: { color: '#f2b8cf', nombre: 'imagen' },
+    id:  { color: '#ffd166', nombre: 'tarjeta de acceso' }, dna: { color: '#7be0a8', nombre: 'muestra genética' }
   };
   // 💡 "Función flecha": una forma corta de escribir una función.
   //    extension('nota.txt') → corta el texto en cada punto y toma el último pedazo → 'txt'
@@ -405,9 +412,9 @@
        colocar()  pone cada carpeta en su lugar y dibuja sus archivos
      Cuando termina, avisa a la escena con el evento "sistema-listo".
      --------------------------------------------------------------------- */
-  const SEP = 1.8;        // distancia entre bloques
-  const HUECO = 1.6;      // espacio entre plataformas vecinas
-  const NIVEL = 10;       // distancia entre un nivel del árbol y el siguiente
+  const SEP = 2.6;        // distancia entre bloques
+  const HUECO = 4;        // espacio entre plataformas vecinas
+  const NIVEL = 18;       // distancia entre un nivel del árbol y el siguiente
 
   AFRAME.registerComponent('sistema-archivos', {
     init() {
@@ -465,20 +472,10 @@
         rotulo: { texto: n.nombre + '/', alto: 0.5, color: '#ffd98a' }
       });
 
-      // Línea en el piso que une a la carpeta con su carpeta madre
-      if (padre) {
-        const x1 = padre.x, z1 = padre.z - padre.d / 2, x2 = x, z2 = n.z + n.d / 2 + 1.1;
-        // 💡 Math.hypot = teorema de Pitágoras (largo de la línea).
-        //    Math.atan2 = el ángulo para girarla y que apunte de una carpeta a la otra.
-        //    "* 180 / Math.PI" convierte de radianes a grados, que es lo que usa A-Frame.
-        const dx = x2 - x1, dz = z2 - z1, largo = Math.hypot(dx, dz);
-        this.crear('a-box', {
-          position: `${(x1 + x2) / 2} 0.02 ${(z1 + z2) / 2}`,
-          rotation: `0 ${Math.atan2(dx, dz) * 180 / Math.PI} 0`,
-          width: 0.08, height: 0.02, depth: largo,
-          material: 'shader: flat; color: #9fb4d0'
-        });
-      }
+      // Línea en el piso que une a la carpeta con su carpeta madre.
+      // 💡 Las líneas van en ángulo recto, como un árbol de carpetas: la madre dibuja
+      //    un tronco y una barra horizontal (más abajo) y cada hija dibuja su tramo vertical.
+      if (padre) this.linea(x, padre.z - padre.d / 2 - 3, x, n.z + n.d / 2 + 1.2);
 
       // Archivos: bloques en una cuadrícula de hasta 3 columnas.
       // 💡 i % 3 = el resto de dividir entre 3 (0,1,2,0,1,2...) → la columna
@@ -510,10 +507,20 @@
       const hijos = n.hijos || [];
       const total = hijos.reduce((s, h) => s + h.anchoSub, 0) + HUECO * Math.max(0, hijos.length - 1);
       let cursor = x - total / 2;
-      hijos.forEach(h => {
-        this.colocar(h, cursor + h.anchoSub / 2, nivel + 1, n, n.ruta);
+      // Primero calculamos el centro de cada hija para poder trazar la barra que las une
+      const centros = hijos.map(h => {
+        const c = cursor + h.anchoSub / 2;
         cursor += h.anchoSub + HUECO;
+        return c;
       });
+      if (hijos.length) {
+        const zAtras = n.z - n.d / 2;           // borde trasero de esta carpeta
+        const zBarra = zAtras - 3;              // la barra horizontal queda 3 m más atrás
+        this.linea(x, zAtras, x, zBarra);       // tronco
+        const xMin = Math.min(x, ...centros), xMax = Math.max(x, ...centros);
+        if (xMax > xMin) this.linea(xMin, zBarra, xMax, zBarra);
+      }
+      hijos.forEach((h, i) => this.colocar(h, centros[i], nivel + 1, n, n.ruta));
     },
 
     // Ayudante: igual que en tu museo, crea una etiqueta con atributos y la mete aquí
@@ -522,6 +529,15 @@
       for (const k in atributos) e.setAttribute(k, atributos[k]);
       this.el.appendChild(e);
       return e;
+    },
+
+    // Ayudante: una línea recta en el piso entre dos puntos (siempre horizontal o vertical)
+    linea(x1, z1, x2, z2) {
+      this.crear('a-box', {
+        position: `${(x1 + x2) / 2} 0.02 ${(z1 + z2) / 2}`,
+        width: Math.abs(x2 - x1) + 0.1, height: 0.02, depth: Math.abs(z2 - z1) + 0.1,
+        material: 'shader: flat; color: #9fb4d0'
+      });
     }
   });
   </script>
@@ -539,7 +555,7 @@
        loading-screen colores de la pantalla de carga de A-Frame
      ================================================================ -->
 <a-scene cursor="rayOrigin: mouse" raycaster="objects: .clicable"
-         background="color: #07101f" fog="type: exponential; color: #07101f; density: 0.016"
+         background="color: #07101f" fog="type: exponential; color: #07101f; density: 0.009"
          xr-mode-ui="enabled: false" loading-screen="dotsColor: #f0a830; backgroundColor: #07101f">
 
   <a-entity id="rig" position="0 22 14">
@@ -551,7 +567,7 @@
        (property: light.intensity) igual que tu museo anima la rotación. -->
   <a-entity id="luz-amb" light="type: ambient; color: #6a4a52; intensity: 0.6"></a-entity>
   <a-entity id="luz-dir" light="type: directional; color: #ffffff; intensity: 0.3" position="-6 12 8"></a-entity>
-  <a-entity id="luz-emerg" light="type: point; color: #ff3b2f; intensity: 40; distance: 70; decay: 1" position="0 9 -10"
+  <a-entity id="luz-emerg" light="type: point; color: #ff3b2f; intensity: 40; distance: 140; decay: 1" position="0 16 -18"
             animation="property: light.intensity; from: 15; to: 60; dir: alternate; loop: true; dur: 900; easing: easeInOutSine"></a-entity>
 
   <!-- El piso cuadriculado y el sistema de archivos. Con ESTAS DOS líneas se
@@ -1011,6 +1027,12 @@ const REGLAS = {
                 : m > 15 * esc ? `Pasillo B: tres siluetas a ${m} m.\nSe mueven por turnos, como si se cubrieran entre ellas.`
                 : `Pasillo B: vacío.\nEso significa que ya están frente a tu puerta.`;
     mostrar(a.nombre, texto);
+  },
+  tarjeta(a) {
+    // Busca la carpeta con clave en el ARBOL: si cambias la clave allá, la tarjeta se actualiza sola.
+    const protegida = NODOS.find(n => n.clave);
+    mostrar(a.nombre, a.texto + '\n\nCLAVE DE ACCESO: ' + protegida.clave);
+    escribir('Tarjeta leída. Clave de ' + protegida.ruta + ': ' + protegida.clave, 'aviso');
   },
   arcade(a) {
     mostrar(a.nombre, 'INSERTE MONEDA\n\n...\n\nNo es momento para jugar.\n(Aunque esto podría ser un buen juego.)');
